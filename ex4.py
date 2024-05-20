@@ -121,13 +121,25 @@ def calcErrorLayerOut(inVecPotsOut, inLblNorm, inVecLayerOut):
         vec_error_out[n] = activationFuncDerived(inVecPotsOut[n]) * inLblNorm[n] - inVecLayerOut[n]
     return vec_error_out
 
-def updateWeights(inMtrx, inWeights, inError,inEpsilon=0.01):
-    #print(f"weights len: {len(inWeights)}")
-    #print(f"mtrx len: {len(inMtrx)}")
-    #print(f"error : {inError}")   
-    for i in range(len(inWeights)):
-        inWeights[i] = inWeights[i] + inEpsilon * inError * inMtrx[i]
-    return inWeights
+def updateWeights(inXIn, inVecWeights, inErrorOut,inEpsilon=0.01):
+    
+    #print(f"\n== Update weights ==")
+    #print(f"X in : {inXIn}")
+    #print(f"weights len: {len(inVecWeights)}  | {inVecWeights}")
+    #print(f"error   len: {len(inErrorOut)}   | {inErrorOut}")
+    
+    #print(f"weights = {inVecWeights}")
+    temp = [None]*len(inVecWeights)
+    
+    for w in range(len(inVecWeights)):
+        temp[w] = inVecWeights[w] + ( inEpsilon * inErrorOut[w] * inXIn )
+    
+    #if temp == inVecWeights:
+    #    print("SAME")
+    #else:
+    #    print("Different")
+    
+    return temp
 
 def calcNeuronOut(inNorm,inWeights,inNumLayer):
     vec_pots    = [None]*inNumLayer
@@ -153,10 +165,10 @@ def calcNeuronOut(inNorm,inWeights,inNumLayer):
 (train_X, train_y), (test_X, test_y) = mnist.load_data()
 
 
-# DEFINE NETWORK MATRICES
-vec_layer_in     = [0] * num_pixels
-vec_layer_hidden = [0] * num_hidden
-vec_layer_out    = [0] * num_out
+# DEFINE NETWORK MATRICES   # NOT USED I THINK
+#vec_layer_in     = [0] * num_pixels
+#vec_layer_hidden = [0] * num_hidden
+#vec_layer_out    = [0] * num_out
 #print(f"netw entry length  = {len(vec_layer_in)}")
 #print(f"netw hidden length = {len(vec_layer_hidden)}")
 #print(f"netw exit length   = {len(vec_layer_out)}")
@@ -220,17 +232,16 @@ vec_error_out = calcErrorLayerOut(vec_pots_out, lbl_norm, vec_layer_out)
 
 
 ### 6. Calc error of each neuron in HIDDEN layer
-## MATTIS EST CONVAINCU, MOI BOF
 
 #DEBUG_error_out = [1]*num_out
 #DEBUG_weight_out = [ [1]*num_out for i in range(num_hidden)]
 #print(f"debug error out: {DEBUG_error_out}")
 #print(f"debug weight out len: {DEBUG_weight_out}")
-#
+
 vec_error_hidden = [None]*num_hidden
 
-print(f"weights out:    # rows:{len(vec_weight_out)}  # cols:{len(vec_weight_out[0])}")
-print(f"weights hidden: # rows:{len(vec_weight_hidden)}  # cols:{len(vec_weight_hidden[0])}")
+#print(f"weights out:    # rows:{len(vec_weight_out)}  # cols:{len(vec_weight_out[0])}")
+#print(f"weights hidden: # rows:{len(vec_weight_hidden)}  # cols:{len(vec_weight_hidden[0])}")
 
 for n_h in range(num_hidden):
     sum_err = 0                                 # sum of each error in out layer * weight between current FOR neuron in hidden layer and error in out layer
@@ -244,21 +255,18 @@ for n_h in range(num_hidden):
 
 
 ### 7. Learn: re-calc weights from Hidden and out layer
-
+## re-calc Out weights
+for i in range(num_hidden):
+    vec_weight_out[i] = updateWeights(inXIn=vec_layer_hidden[i], inVecWeights=vec_weight_out[i], inErrorOut=vec_error_out, inEpsilon=0.01)
 
 ## re-calc Hidden weights
-#print(f"\nweights hidden = {vec_weight_hidden}")
-for i in range(len(vec_error_hidden)):
-    vec_weight_hidden[i] = updateWeights(vec_layer_in, vec_weight_hidden[i], vec_error_hidden[i], 0.01)
-#print(f"\nweights hidden = {vec_weight_hidden}")
+#print(f"\nweights hidden = {vec_weight_hidden[0]}")
+for i in range(num_pixels):
+    vec_weight_hidden[i] = updateWeights(inXIn=img_norm[i], inVecWeights=vec_weight_hidden[i], inErrorOut=vec_error_hidden, inEpsilon=0.01)
+#print(f"\nweights hidden = {vec_weight_hidden[0]}")
 
-
-## re-calc out weights
-for i in range(len(vec_error_out)):
-    vec_weight_out[i] = updateWeights(vec_layer_hidden, vec_weight_out[i], vec_error_out[i], 0.01)
 
 ### 8. Calc error percentage on random sample of num_imgs imgs
-"""
 num_imgs = 100
 mtrx_norm_imgs   = [None]*num_imgs
 vec_norm_lbl    = [None]*num_imgs
@@ -266,7 +274,8 @@ for i in range(num_imgs):
     img_sel, lbl_sel    = getRndmImg(train_X,train_y)
     mtrx_norm_imgs[i]   = normaliseConvert2D(img_sel)
     vec_norm_lbl[i]     = normaliseLbl(lbl_sel)
-"""
+
+
 
 
 
