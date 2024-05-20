@@ -17,7 +17,7 @@ epsilon     = 0.01
 
 ### VECTOR / MTRX DELCARATION
 
-""" VEC / MTRX for testing layers propagation
+#""" VEC / MTRX for testing layers propagation
 ## FOR TESTING HIDDEN LAYER
 DEBUG_hidden_vec_img_ones    = [1]*num_pixels
 
@@ -49,7 +49,7 @@ DEBUG_out_vec_img_one_l[num_hidden-1]  = 1
 DEBUG_out_vec_img_zeros   = [0]*num_hidden
 
 DEBUG_mtrx_weights_out_ones = [[1]*num_hidden]*num_out
-"""
+#"""
 
 
 def getRndmImg(inImgs, inLbls):
@@ -129,6 +129,19 @@ def updateWeights(inMtrx, inWeights, inError,inEpsilon=0.01):
         inWeights[i] = inWeights[i] + inEpsilon * inError * inMtrx[i]
     return inWeights
 
+def calcNeuronOut(inNorm,inWeights,inNumLayer):
+    vec_pots    = [None]*inNumLayer
+    for n in range(inNumLayer):
+        vec_pots[n] = calcPotential(inNorm, inWeights[n])
+    #print(f"vec pots: {vec_pots}")
+    
+    vec_layer   = [None]*inNumLayer
+    for n in range(inNumLayer):
+        vec_layer[n] = activationFunc(vec_pots[n])
+    #print(f"vec layer:  {vec_layer}")
+
+    return vec_layer, vec_pots
+
 ############################################################
 ##################### CODE #################################
 ############################################################
@@ -165,40 +178,23 @@ vec_weight_out       = getWeights(num_out, num_hidden)
 #print(f"some random weights:\n{vec_weight_hidden[5][20:25]}\n{vec_weight_hidden[25][250:255]}\n{vec_weight_hidden[80][560:565]}\n")
 
 ### 3. Calc neuron output for HIDDEN layer
-
-vec_pots_hidden = [None]*num_hidden
-for n in range(num_hidden):
-    vec_pots_hidden[n] = calcPotential(img_norm, vec_weight_hidden[n])
-#print(f"vec pots hidden: {vec_pots_hidden}")
-
-vec_layer_hidden = [None]*num_hidden
-for n in range(num_hidden):
-    vec_layer_hidden[n] = activationFunc(vec_pots_hidden[n])
-#print(f"vec layer hidden:  {vec_layer_hidden}")
+vec_pots_hidden, vec_layer_hidden = calcNeuronOut(img_norm, vec_weight_hidden, num_hidden)
 
 ### 4. Calc neuron output for OUT layer
-vec_pots_out = [None]*num_out
-for n in range(num_out):
-    vec_pots_out[n] = calcPotential(vec_layer_hidden,vec_weight_out[n])
-#print(f"vec pots out:  {vec_pots_out}")
-
-vec_layer_out = [None]*num_out
-for n in range(num_out):
-    vec_layer_out[n] = activationFunc(vec_pots_out[n])
-#print(f"vec layer out:  {vec_layer_out}")
+vec_pots_out, vec_layer_out = calcNeuronOut(vec_layer_hidden, vec_weight_out,num_out)
 
 
 """ DEBUG TEST PROPAGATION
-#print("test hidden layer)
+print("test hidden layer")
 #print(f"DEBUG only ones:    {DEBUG_hidden_vec_img_ones}")                  # TESTED = OK
-#print(f"DEBUG only zeeros:  {DEBUG_hidden_vec_img_zeros}")                 # TESTED = OK
+#print(f"DEBUG only zeros:  {DEBUG_hidden_vec_img_zeros}")                  # TESTED = OK
 #print(f"DEBUG 1 start:      {DEBUG_hidden_vec_img_one_s}")                 # TESTED = OK
 #print(f"DEBUG 1 middle:     {DEBUG_hidden_vec_img_one_m}")                 # TESTED = OK
 #print(f"DEBUG 1 end:        {DEBUG_hidden_vec_img_one_l}")                 # TESTED = OK
-#print(f"DEBUG weights hid:  {DEBUG_mtrx_weights_hidden_ones}")
+print(f"DEBUG weights hid:  {DEBUG_mtrx_weights_hidden_ones}")
 DEBUG_vec_pots_hidden = [None]*num_hidden
 for n in range(num_hidden):
-    DEBUG_vec_pots_hidden[n] = calcPotential(DEBUG_out_vec_img_one_l, DEBUG_mtrx_weights_hidden_ones[n])
+    DEBUG_vec_pots_hidden[n] = calcPotential(DEBUG_hidden_vec_img_one_l, DEBUG_mtrx_weights_hidden_ones[n])
 print(f"\n{DEBUG_vec_pots_hidden}")
 
 print("test out layer")
@@ -206,8 +202,8 @@ print("test out layer")
 #print(f"DEBUG only zeeros:  {DEBUG_out_vec_img_zeros}")                 # TESTED = 
 #print(f"DEBUG 1 start:      {DEBUG_out_vec_img_one_s}")                 # TESTED = 
 #print(f"DEBUG 1 middle:     {DEBUG_out_vec_img_one_m}")                 # TESTED = 
-#print(f"DEBUG 1 end:        {DEBUG_out_vec_img_one_l}")                 # TESTED = 
-print(f"DEBUG weights hid:  {DEBUG_mtrx_weights_out_ones}")
+print(f"DEBUG 1 end:        {DEBUG_out_vec_img_one_l}")                 # TESTED = 
+#print(f"DEBUG weights hid:  {DEBUG_mtrx_weights_out_ones}")
 
 
 DEBUG_vec_pots_out = [None]*num_out
@@ -220,7 +216,7 @@ print(f"\n{DEBUG_vec_pots_out}")
 
 ### 5. Calc error of each neuron in OUT layer       
 vec_error_out = calcErrorLayerOut(vec_pots_out, lbl_norm, vec_layer_out)    
-print(f"vec error out: {vec_error_out}")
+#print(f"vec error out: {vec_error_out}")
 
 
 ### 6. Calc error of each neuron in HIDDEN layer
@@ -230,16 +226,20 @@ print(f"vec error out: {vec_error_out}")
 #DEBUG_weight_out = [ [1]*num_out for i in range(num_hidden)]
 #print(f"debug error out: {DEBUG_error_out}")
 #print(f"debug weight out len: {DEBUG_weight_out}")
-
+#
 vec_error_hidden = [None]*num_hidden
+
+print(f"weights out:    # rows:{len(vec_weight_out)}  # cols:{len(vec_weight_out[0])}")
+print(f"weights hidden: # rows:{len(vec_weight_hidden)}  # cols:{len(vec_weight_hidden[0])}")
+
 for n_h in range(num_hidden):
-    sum_errOut_wOut = 0
+    sum_err = 0                                 # sum of each error in out layer * weight between current FOR neuron in hidden layer and error in out layer
     for n_o in range(num_out):
         #print(f" calc:{vec_error_out[n_o]} * {vec_weight_out[n_o][n_h]}")
         #print(f" calc result:{vec_error_out[n_o] * vec_weight_out[n_o][n_h]}")
-        sum_errOut_wOut +=  vec_error_out[n_o] * vec_weight_out[n_o][n_h]
+        sum_err +=  vec_error_out[n_o] * vec_weight_out[n_o][n_h]
     #print(f"sum errout: {sum_errOut_wOut}")
-    vec_error_hidden[n_h] = activationFuncDerived( vec_pots_hidden[n_h] ) * sum_errOut_wOut
+    vec_error_hidden[n_h] = activationFuncDerived( vec_pots_hidden[n_h] ) * sum_err
 #print(f"\nvec error hidden: {vec_error_hidden}")
 
 
