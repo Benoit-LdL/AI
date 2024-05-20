@@ -94,12 +94,12 @@ def printImg(inImg,inPixel=pixels_wdth):
     print("="*inPixel*spacing)
 
 
-def getWeights(numNeuron, numInput):
+def getWeights(numNeuronIn, numNeuronOut):
     nVec_weights = []
-    for neuron in range(numNeuron):
+    for neuron in range(numNeuronIn):
         nVec_neuron = []
-        for weight in range(numInput):
-            nVec_neuron.append(rnd.random()/numInput)
+        for weight in range(numNeuronOut):
+            nVec_neuron.append(rnd.random()/numNeuronOut)
         nVec_weights.append(nVec_neuron)
     return nVec_weights
 
@@ -172,8 +172,8 @@ print(f"selected img label: {lbl_sel}  | normalised: {lbl_norm}")
 printImg(img_norm)
 
 ### X. Init weight vectors
-vec_weight_hidden    = getWeights(num_hidden, num_pixels)
-vec_weight_out       = getWeights(num_out, num_hidden)
+vec_weight_hidden    = getWeights(num_pixels, num_hidden)
+vec_weight_out       = getWeights(num_hidden, num_out)
 #print(f"rows weight hidden: {len(vec_weight_hidden)} | col weight hidden: {len(vec_weight_hidden[0])} ")
 #print(f"some random weights:\n{vec_weight_hidden[5][20:25]}\n{vec_weight_hidden[25][250:255]}\n{vec_weight_hidden[80][560:565]}\n")
 
@@ -237,7 +237,7 @@ for n_h in range(num_hidden):
     for n_o in range(num_out):
         #print(f" calc:{vec_error_out[n_o]} * {vec_weight_out[n_o][n_h]}")
         #print(f" calc result:{vec_error_out[n_o] * vec_weight_out[n_o][n_h]}")
-        sum_err +=  vec_error_out[n_o] * vec_weight_out[n_o][n_h]
+        sum_err +=  vec_error_out[n_o] * vec_weight_out[n_h][n_o]
     #print(f"sum errout: {sum_errOut_wOut}")
     vec_error_hidden[n_h] = activationFuncDerived( vec_pots_hidden[n_h] ) * sum_err
 #print(f"\nvec error hidden: {vec_error_hidden}")
