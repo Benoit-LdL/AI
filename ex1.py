@@ -1,11 +1,6 @@
 import random
 import matplotlib.pyplot as plt
 
-# 48 entree dans reseau neurone
-# resultat va etre tres mauvais, mais va s'améliorer au cours de exo 2 et 3
-
-# pas init graine aléatoire pour faciliter débugger et si ca fonctionne, alors on peut le definir graine
-
 mtrx_zero       = []
 mtrx_one        = []
 mtrx_weights    = []

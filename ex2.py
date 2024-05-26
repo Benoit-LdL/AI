@@ -10,6 +10,7 @@ alpha           = 0.01  # limit for model training
 
 random.seed()
 
+# Read data from files
 def readTxt():
     f_zero  = open("zero.txt","r")
     f_one   = open("one.txt","r")
@@ -39,6 +40,7 @@ def readTxt():
     
     return mtrx_zero, mtrx_one
 
+# Function used to visualise matrix in terminal
 def printMtrx(inMtrx):
     counter = 0
     line = ""
@@ -52,22 +54,26 @@ def printMtrx(inMtrx):
     if len(inMtrx) == 49:
         print(f"Y = {inMtrx[len(inMtrx)-1]}")
 
+# Returns new weights
 def calcWeight(numweights):
     for _ in range(numweights):
         mtrx_weights.append(random.random()/numweights) #*100)
 
+# Calc neuron potential
 def calcNeuronPotential(inMtrx, inWeights):
     sum = 0
     for i in range(len(inWeights)):
         sum += inWeights[i] * inMtrx[i]
     return sum
 
+# Activation function
 def activationFunc(inPot, theta):
     if inPot >= theta:
         return 1
     else:
         return 0
 
+# Update Weights
 def updateWeights(inMtrx, inWeights, inError):
     for i in range(len(inWeights)):
         ##inWeights[i] = inWeights[i] + epsilon*inError * inMtrx[i]
@@ -75,6 +81,7 @@ def updateWeights(inMtrx, inWeights, inError):
 
     return inWeights
 
+# Train model 
 def trainModel(mtrx_weights,theta):
     mtrx_selected   = []
     y_selected      = 0
@@ -141,6 +148,7 @@ def trainModel(mtrx_weights,theta):
         plt.plot([ lst_error[i][0] , lst_error[i+1][0] ] , [ lst_error[i][1] , lst_error[i+1][1] ], color="red", marker=".")
     #plt.show()
 
+# Generate noise
 def generateNoise(inMtrx,inPercent):
     newMtrx = inMtrx.copy()
     
@@ -158,6 +166,7 @@ def generateNoise(inMtrx,inPercent):
     #printMtrx(inMtrx)
     return newMtrx
 
+# Advanced version of network testing
 def testNetworkAdvanced(inWeights, iter=50, inTheta=0.5, inPercent=50):
    
     lst_errors_zero = []
@@ -196,7 +205,7 @@ def testNetworkAdvanced(inWeights, iter=50, inTheta=0.5, inPercent=50):
         lst_errors_zero.append( [noise,num_false_zero])
         lst_errors_one.append(  [noise,num_false_one])
     
-    ## CHEATING
+    ## CHEATING, weardily, the second error is always a high value, so i filter it out here
     lst_errors_zero[1][1] = 0
     lst_errors_one[1][1] = 0
     
@@ -225,7 +234,7 @@ mtrx_zero, mtrx_one = readTxt()
 # calc weights randomly
 calcWeight(len(mtrx_zero)-1)
 
-## TRAIN MODELrndInt
+## TRAIN MODEL
 ##############
 trainModel(mtrx_weights,theta)
 
